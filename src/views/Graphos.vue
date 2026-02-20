@@ -26,14 +26,28 @@
          @click="handleCanvasClick">
 
       <svg ref="svgRef" width="100%" height="600">
+        <defs>
+            <marker
+                id="arrow"
+                markerWidth="10"
+                markerHeight="10"
+                refX="10"
+                refY="3"
+                orient="auto"
+                markerUnits="strokeWidth"
+            >
+                <path d="M0,0 L0,6 L9,3 z" fill="#5e3370" />
+            </marker>
+        </defs>
 
         <!-- ARISTAS -->
         <g v-for="(edge, index) in edges" :key="edge.id">
           <path
             :d="getEdgePath(edge)"
-            stroke="#5e3370"
+            stroke="#111111"
             stroke-width="2"
             fill="none"
+            :marker-end="edge.directed ? 'url(#arrow)': null"
             @click.stop="deleteElement(edge, 'edge')"
           />
 
@@ -49,15 +63,14 @@
         </g>
 
         <!-- NODOS -->
-        <g v-for="node in nodes" :key="node.id">
+        <g v-for="node in nodes" :key="node.id" @click.stop="selectNode(node)" style="cursor: pointer">
           <circle
             :cx="node.x"
             :cy="node.y"
             r="25"
             fill="#fff"
-            stroke="#8e44ad"
+            stroke="#111111"
             stroke-width="3"
-            @click.stop="selectNode(node)"
           />
 
           <text
@@ -107,7 +120,7 @@ function createNode(event) {
   })
 }
 
-// Selección para crear arista
+//Para crear arista
 function selectNode(node) {
   if (deleteMode.value) {
     deleteElement(node, 'node')
@@ -117,16 +130,32 @@ function selectNode(node) {
   if (!selectedNode.value) {
     selectedNode.value = node
   } else {
-    const weight = prompt("Peso de la arista:", "1")
-    if (weight !== null) {
-      edges.value.push({
-        id: edgeCount++,
-        from: selectedNode.value,
-        to: node,
-        weight,
-        directed: directed.value
-      })
+    if (selectedNode.value.id === node.id) {
+      // permite bucle
     }
+
+    let weight = prompt("Peso (solo números):", "1")
+    if (weight === null) {
+      selectedNode.value = null
+      return
+    }
+
+    weight = Number(weight)
+
+    if (isNaN(weight)) {
+      alert("Solo se permiten números.")
+      selectedNode.value = null
+      return
+    }
+
+    edges.value.push({
+      id: edgeCount++,
+      from: selectedNode.value,
+      to: node,
+      weight,
+      directed: directed.value
+    })
+
     selectedNode.value = null
   }
 }
@@ -156,46 +185,73 @@ function clearAll() {
 // Calcular curva para múltiples aristas
 function getEdgePath(edge) {
   const { from, to } = edge
+  const r = 25 // radio nodo
 
-  if (from === to) {
-    // Bucle
+  if (from.id === to.id) {
+
+    const loopRadius = 40
+    const startX = from.x
+    const startY = from.y - r
+
     return `
-      M ${from.x} ${from.y - 25}
-      C ${from.x + 40} ${from.y - 60},
-        ${from.x - 40} ${from.y - 60},
-        ${from.x} ${from.y - 25}
+      M ${startX} ${startY}
+      a ${loopRadius} ${loopRadius} 0 1 1 1 0
     `
   }
 
   const dx = to.x - from.x
   const dy = to.y - from.y
-  const dr = Math.sqrt(dx * dx + dy * dy)
+  const distance = Math.sqrt(dx * dx + dy * dy)
 
-  const offset = getParallelOffset(edge)
+  const normX = dx / distance
+  const normY = dy / distance
+
+  // recortar inicio y fin en el borde del nodo
+  const startX = from.x + normX * r
+  const startY = from.y + normY * r
+  const endX = to.x - normX * r
+  const endY = to.y - normY * r
+
+  const offset = 40
+  const controlX = (startX + endX) / 2 - normY * offset
+  const controlY = (startY + endY) / 2 + normX * offset
 
   return `
-    M ${from.x} ${from.y}
-    Q ${(from.x + to.x) / 2 + offset}
-      ${(from.y + to.y) / 2 - offset}
-      ${to.x} ${to.y}
+    M ${startX} ${startY}
+    Q ${controlX} ${controlY}
+      ${endX} ${endY}
   `
-}
-
-// Evitar superposición
-function getParallelOffset(edge) {
-  const sameEdges = edges.value.filter(
-    e => e.from === edge.from && e.to === edge.to
-  )
-  const index = sameEdges.indexOf(edge)
-  return index * 20
 }
 
 // Posición del peso
 function getWeightPosition(edge) {
   const { from, to } = edge
+  const r = 25
+
+  if (from.id === to.id) {
+    return {
+      x: from.x + 45,
+      y: from.y - 45
+    }
+  }
+
+  const dx = to.x - from.x
+  const dy = to.y - from.y
+  const distance = Math.sqrt(dx * dx + dy * dy)
+
+  const normX = dx / distance
+  const normY = dy / distance
+
+  const startX = from.x + normX * r
+  const startY = from.y + normY * r
+  const endX = to.x - normX * r
+  const endY = to.y - normY * r
+
+  const offset = 40
+
   return {
-    x: (from.x + to.x) / 2,
-    y: (from.y + to.y) / 2 - 10
+    x: (startX + endX) / 2 - normY * offset,
+    y: (startY + endY) / 2 + normX * offset
   }
 }
 
@@ -247,7 +303,7 @@ button.active {
 .canvas {
   width: 100%;
   height: 70vh;
-  background: #fff;
+  background: #ffffff;
   border-radius: 12px;
   box-shadow: 0 4px 15px rgba(0,0,0,0.1);
 }

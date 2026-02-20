@@ -3,17 +3,19 @@
         <div class="header">
             <h1>Conceptos de Algoritmos</h1>
         </div>
-        <section class="concept-section">
+        <div class="card">
             <h2>¿Qué es un algoritmo?</h2>
-            <p>
-                Un algoritmo es una secuencia ordenada y finita de instrucciones para realizar un cálculo, 
-                desarrollar una tarea o resolver un problema específico. Cada paso en un algoritmo está bien 
-                definido y puede ser ejecutado para producir un resultado, que puede tratarse de un proceso sencillo,
-                como una operación aritmética, o de una compleja serie de operaciones utilizadas en 
-                machine learning para analizar grandes conjuntos de datos y hacer predicciones.
-                Los algoritmos son la base de la programación y se utilizan para diseñar programas que 
-                ejecuten tareas específicas.
-            </p>
+                <p>
+                    Un algoritmo es una secuencia ordenada y finita de instrucciones para realizar un cálculo, 
+                    desarrollar una tarea o resolver un problema específico. Cada paso en un algoritmo está bien 
+                    definido y puede ser ejecutado para producir un resultado, que puede tratarse de un proceso sencillo,
+                    como una operación aritmética, o de una compleja serie de operaciones utilizadas en 
+                    machine learning para analizar grandes conjuntos de datos y hacer predicciones.
+                    Los algoritmos son la base de la programación y se utilizan para diseñar programas que 
+                    ejecuten tareas específicas.
+                </p>
+        </div>
+        <div class="card">
             <h2>Características</h2>
             <ul>
                 <li><strong>Preciso:</strong>Cada paso está claramente definido.</li>
@@ -22,70 +24,93 @@
                 <li><strong>Ordenado: </strong> Sigue una secuencia lógica.</li>
                 <li><strong>General: </strong> Puede aplicarse a múltiples casos similares.</li>
             </ul>
-            <div class="image-container">
-                <img src="../assets/algoritmo.jpg">
-            </div>
+        </div>
+            
+        <div class="image-container">
+            <img src="../assets/algoritmo.jpg">
+        </div>
+        
+        <div class="card">
             <h2>Aplicaciones de Algoritmos</h2>
-            <p>
-                Los algoritmos se encuentran presentes en diversos campos, ya que tienen diferentes usos
-                en los sistemas tecnológicos modernos.
-            </p>
+                <p>
+                    Los algoritmos se encuentran presentes en diversos campos, ya que tienen diferentes usos
+                    en los sistemas tecnológicos modernos.
+                </p>
             <ul>
-                <li><strong>Procesamiento de datos: </strong> los algoritmos permiten 
+                <li><strong>Procesamiento de datos: </strong> Los algoritmos permiten 
                     organizar y analizar grandes volúmenes de información de manera eficiente.</li>
-                <li>Inteligencia artificial y aprendizaje automático: gracias a ellos, 
+                <li><strong>Inteligencia artificial y aprendizaje automático: </strong> Gracias a ellos, 
                     las máquinas aprenden patrones y predicen comportamientos futuros.</li>
-                <li>Redes y comunicaciones: se utilizan para reducir la cantidad de datos que
+                <li><strong>Redes y comunicaciones: </strong> Se utilizan para reducir la cantidad de datos que
                     necesitan ser transmitidos por internet sin sacrificar la calidad.</li>
-                <li>Automatización: controlan el comportamiento de los robots y 
+                <li><strong>Automatización: </strong> Controlan el comportamiento de los robots y 
                     permiten automatizar tareas repetitivas y rutinarias.</li>
-                <li>Optimización de recursos: ayudan a mejorar el uso de recursos, como 
+                <li><strong>Optimización de recursos: </strong> Ayudan a mejorar el uso de recursos, como 
                     en la programación de rutas de transporte, o de sistemas como centrales 
                     eléctricas o cadenas de suministro.</li>
-            </ul>
-            <div class="videos-section">
-                <h2>Videos recomendados</h2>
-                <div class="videos-grid">
-                    <iframe 
-                        src="https://www.youtube.com/watch?v=U3CGMyjzlvM"
-                        title="Video 1"
-                        frameborder="0"
-                        allowfullscreen>
-                    </iframe>
-
-                    <iframe 
-                        src="https://www.youtube.com/watch?v=RSJrBEhdZxw"
-                        title="Video 2"
-                        frameborder="0"
-                        allowfullscreen>
-                    </iframe>
-
-                    <iframe 
-                        src="https://www.youtube.com/watch?v=EkObhToiseo"
-                        title="Video 3"
-                        frameborder="0"
-                        allowfullscreen>
-                    </iframe>
-            </div>
-            </div>
+                </ul>
+        </div>
             
-        </section>
+        <div class="videos-section">
+            <h2>Videos recomendados</h2>
+            <div class="videos-grid">
+                <iframe 
+                    src="https://www.youtube.com/embed/U3CGMyjzlvM"
+                    title="Video 1"
+                    frameborder="0"
+                    allowfullscreen>
+                </iframe>
+
+                <iframe 
+                    src="https://www.youtube.com/embed/RSJrBEhdZxw"
+                    title="Video 2"
+                    frameborder="0"
+                    allowfullscreen>
+                </iframe>
+
+                <iframe 
+                    src="https://www.youtube.com/embed/EkObhToiseo"
+                    title="Video 3"
+                    frameborder="0"
+                    allowfullscreen>
+                </iframe>
+            </div>
+        </div>
     </section>
 </template>
 
 <style scoped>
 .algoritmos {
-  padding: 3rem 2rem;
-  max-width: 1000px;
-  margin: auto;
+  padding: 4rem 2rem;
+  background-color: #fff9c4;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .header {
   text-align: center;
   margin-bottom: 3rem;
 }
-.concept-section{
-    text-align: left;
+.card {
+  padding: 2rem;
+  margin-bottom: 2.5rem;
+  border-radius: 16px;
+  background-color: #e5dea1;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+.card h2 {
+  margin-bottom: 1rem;
+  color: #111111;
+}
+
+.card ul {
+  padding-left: 1.5rem;
+}
+.card li {
+  margin-bottom: 0.5rem;
 }
 .image-container {
   text-align: center;
@@ -98,7 +123,6 @@
 .videos-section h2 {
   text-align: center;
   margin-bottom: 2rem;
-  color: #8e44ad;
 }
 .videos-grid {
   display: grid;
@@ -108,7 +132,14 @@
 
 .videos-grid iframe {
   width: 100%;
-  height: 200px;
+  height: 250px;
   border-radius: 12px;
+}
+.card,
+.header,
+.videos-section,
+.image-container {
+  width: 100%;
+  max-width: 1000px;
 }
 </style>

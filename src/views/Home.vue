@@ -20,6 +20,7 @@
 .hero {
   background-color: #fff9c4;
   min-height: 90vh;
+  width: 100%;
   display: flex;
   align-items: center;
 }
@@ -31,7 +32,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 2rem;
+  padding: 2rem 50px;
 }
 
 .hero-image img {
