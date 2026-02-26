@@ -414,7 +414,6 @@ svg {
 }
 
 .matrix-section {
-  margin-top: 2rem;
   background: rgb(200, 239, 141);
   padding: 1rem;
   border-radius: 12px;
