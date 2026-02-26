@@ -84,12 +84,62 @@
         </g>
 
       </svg>
+      <div v-if="directed && adjacencyData" class="matrix-section">
+
+        <h2><strong>Matriz de Adyacencia</strong></h2>
+
+        <table>
+          <thead>
+            <tr>
+              <th></th>
+              <th v-for="node in nodes" :key="node.id">
+                {{ node.label }}
+              </th>
+              <th>Σ fila</th>
+              <th>Salidas</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr v-for="(row, i) in adjacencyData.matrix" :key="i">
+              <th>{{ nodes[i].label }}</th>
+
+              <td v-for="(value, j) in row" :key="j">
+                {{ value }}
+              </td>
+
+              <td>{{ adjacencyData.rowSums[i] }}</td>
+              <td>{{ adjacencyData.outDegree[i] }}</td>
+            </tr>
+
+            <tr>
+              <th>Σ columna</th>
+              <td v-for="(sum, j) in adjacencyData.colSums" :key="j">
+                {{ sum }}
+              </td>
+              <td></td>
+              <td></td>
+            </tr>
+
+            <tr>
+              <th>Entradas</th>
+              <td v-for="(deg, j) in adjacencyData.inDegree" :key="j">
+                {{ deg }}
+              </td>
+              <td></td>
+              <td></td>
+            </tr>
+
+          </tbody>
+        </table>
+
+      </div>
     </div>
   </section>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 
 const nodes = ref([])
 const edges = ref([])
@@ -100,6 +150,57 @@ const svgRef = ref(null)
 
 let nodeCount = 0
 let edgeCount = 0
+
+// MATRIZ
+const adjacencyData = computed(() => {
+
+  if (!directed.value) return null
+
+  const n = nodes.value.length
+  const matrix = Array.from({ length: n }, () =>
+    Array(n).fill(0)
+  )
+
+  const inDegree = Array(n).fill(0)
+  const outDegree = Array(n).fill(0)
+
+  // mapa id - índice
+  const indexMap = {}
+  nodes.value.forEach((node, index) => {
+    indexMap[node.id] = index
+  })
+
+  // recorrer aristas
+  edges.value.forEach(edge => {
+    if (!edge.directed) return
+
+    const i = indexMap[edge.from.id]
+    const j = indexMap[edge.to.id]
+
+    matrix[i][j] += edge.weight
+    outDegree[i] += 1
+    inDegree[j] += 1
+  })
+
+  const rowSums = matrix.map(row =>
+    row.reduce((a, b) => a + b, 0)
+  )
+
+  const colSums = Array(n).fill(0)
+  for (let j = 0; j < n; j++) {
+    for (let i = 0; i < n; i++) {
+      colSums[j] += matrix[i][j]
+    }
+  }
+
+  return {
+    matrix,
+    rowSums,
+    colSums,
+    inDegree,
+    outDegree
+  }
+})
 
 // Crear nodo
 function createNode(event) {
@@ -310,6 +411,29 @@ button.active {
 
 svg {
   cursor: crosshair;
+}
+
+.matrix-section {
+  margin-top: 2rem;
+  background: rgb(200, 239, 141);
+  padding: 1rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+table {
+  border-collapse: collapse;
+  margin: auto;
+}
+
+th, td {
+  border: 1px solid #444;
+  padding: 6px 10px;
+  text-align: center;
+}
+
+th {
+  background: #eee;
 }
 
 </style>
