@@ -449,6 +449,8 @@ function clearAll() {
   edges.value = []
 
   selectedNode.value = null
+  deleteMode.value = false
+  editMode.value = false
 
   nodeCount = 0
   edgeCount = 0
