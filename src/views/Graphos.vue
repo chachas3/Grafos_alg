@@ -11,14 +11,36 @@
         Dirigido
       </label>
 
-      <button @click="deleteMode = !deleteMode"
+      <button @click="toggleDelete"
               :class="{ active: deleteMode }">
         Eliminar
+      </button>
+
+      <button @click="toggleEdit"
+              :class="{ active: editMode }">
+        Editar
       </button>
 
       <button @click="clearAll">
         Limpiar todo
       </button>
+
+      <button @click="exportGraph">
+        Exportar
+      </button>
+
+      <button @click="triggerImport">
+        Importar
+      </button>
+
+      <input
+        type="file"
+        ref="fileInput"
+        accept=".json"
+        style="display:none"
+        @change="importGraph"
+      />
+
     </div>
 
     <div class="canvas"
@@ -48,7 +70,7 @@
             stroke-width="2"
             fill="none"
             :marker-end="edge.directed ? 'url(#arrow)': null"
-            @click.stop="deleteElement(edge, 'edge')"
+            @click.stop="handleEdgeClick(edge)"
           />
 
           <!-- peso -->
@@ -146,6 +168,8 @@ const edges = ref([])
 const selectedNode = ref(null)
 const directed = ref(false)
 const deleteMode = ref(false)
+const editMode = ref(false)
+const fileInput = ref(null)
 const svgRef = ref(null)
 
 let nodeCount = 0
@@ -223,6 +247,15 @@ function createNode(event) {
 
 //Para crear arista
 function selectNode(node) {
+  if (editMode.value) {
+    const newName = prompt("Nuevo nombre del nodo:", node.label)
+
+    if (newName) {
+      node.label = newName
+    }
+    return
+  }
+
   if (deleteMode.value) {
     deleteElement(node, 'node')
     return
@@ -261,6 +294,47 @@ function selectNode(node) {
   }
 }
 
+function toggleEdit(){
+
+  editMode.value = !editMode.value
+
+  if(editMode.value){
+    deleteMode.value = false
+  }
+}
+function toggleDelete(){
+
+  deleteMode.value = !deleteMode.value
+
+  if(deleteMode.value){
+    editMode.value = false
+  }
+}
+
+function handleEdgeClick(edge) {
+
+  if (deleteMode.value) {
+    deleteElement(edge, 'edge')
+    return
+  }
+
+  if (editMode.value) {
+
+    let newWeight = prompt("Nuevo peso:", edge.weight)
+
+    if (newWeight === null) return
+
+    newWeight = Number(newWeight)
+
+    if (isNaN(newWeight)) {
+      alert("Solo números")
+      return
+    }
+
+    edge.weight = newWeight
+  }
+}
+
 // Eliminar nodo o arista
 function deleteElement(element, type) {
   if (!deleteMode.value) return
@@ -277,10 +351,107 @@ function deleteElement(element, type) {
   }
 }
 
+async function exportGraph() {
+
+  const data = {
+    nodes: nodes.value,
+    edges: edges.value.map(e => ({
+      id: e.id,
+      from: e.from.id,
+      to: e.to.id,
+      weight: e.weight,
+      directed: e.directed
+    })),
+    directed: directed.value
+  }
+
+  const json = JSON.stringify(data, null, 2)
+  if ('showSaveFilePicker' in window) {
+
+    try {
+      const handle = await window.showSaveFilePicker({
+        suggestedName: "grafo.json",
+        types: [
+          {
+            description: "Archivo de grafo",
+            accept: { "application/json": [".json"] }
+          }
+        ]
+      })
+      const writable = await handle.createWritable()
+
+      await writable.write(json)
+
+      await writable.close()
+
+    } catch (err) {
+      console.log("Guardado cancelado")
+    }
+  }else {
+
+    const blob = new Blob([json], { type: "application/json" })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement("a")
+    a.href = url
+    a.download = "grafo.json"
+
+    a.click()
+
+    URL.revokeObjectURL(url)
+  }
+  
+}
+
+function triggerImport() {
+  fileInput.value.click()
+}
+
+function importGraph(event) {
+  const file = event.target.files[0]
+  if (!file) return
+
+  const reader = new FileReader()
+
+  reader.onload = (e) => {
+
+    const data = JSON.parse(e.target.result)
+
+    clearAll()
+
+    nodes.value = data.nodes
+    directed.value = data.directed
+
+    const nodeMap = {}
+
+    nodes.value.forEach(node => {
+      nodeMap[node.id] = node
+    })
+
+    edges.value = data.edges.map(e => ({
+      id: e.id,
+      from: nodeMap[e.from],
+      to: nodeMap[e.to],
+      weight: e.weight,
+      directed: e.directed
+    }))
+
+    nodeCount = Math.max(...nodes.value.map(n => n.id)) + 1
+    edgeCount = Math.max(...edges.value.map(e => e.id)) + 1
+  }
+
+  reader.readAsText(file)
+  event.target.value = ""
+}
+
 // Limpiar todo
 function clearAll() {
   nodes.value = []
   edges.value = []
+
+  selectedNode.value = null
+
+  nodeCount = 0
+  edgeCount = 0
 }
 
 // Calcular curva para múltiples aristas
@@ -290,13 +461,18 @@ function getEdgePath(edge) {
 
   if (from.id === to.id) {
 
-    const loopRadius = 40
+    const loopRadius = 28
     const startX = from.x
     const startY = from.y - r
 
+    const endX = from.x + 1
+    const endY = from.y - r
+
     return `
       M ${startX} ${startY}
-      a ${loopRadius} ${loopRadius} 0 1 1 1 0
+      C ${from.x + 50} ${from.y - 60},
+        ${from.x - 50} ${from.y - 60},
+        ${endX} ${endY}
     `
   }
 
@@ -331,7 +507,7 @@ function getWeightPosition(edge) {
 
   if (from.id === to.id) {
     return {
-      x: from.x + 45,
+      x: from.x + 35,
       y: from.y - 45
     }
   }
